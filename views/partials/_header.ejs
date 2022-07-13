@@ -15,8 +15,27 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>        
       </div>
-    </div>
-  </nav>
+    </div> 
+    
+  </form>
+  <% if(username !== undefined){ %>
+    <label style="margin: 0 1em">Logged in as: <%= username %></label>
+    <form class="form-inline" action="/logout" method="POST">
+      <button type="submit" class="btn btn-outline-dark" style="margin: 0 1em">Logout</button>
+    </form>
+  <% } else{ %>  
+    <form class="form-inline" action="/login" method="POST">
+      <div class="form-group mb-2">
+        <label for="username">Enter a username:</label>
+        <input
+          class="form-control"
+          type="text"
+          name="username"
+          style="width: 300px; margin: 0 1em"
+        />
+        <button type="submit" class="btn btn-outline-dark">Login</button>
+ <% } %>
+</nav>
 </header>
