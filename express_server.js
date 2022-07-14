@@ -1,12 +1,13 @@
 const express = require("express"); //Express framework (Routing/Server)
-const cookieParser = require("cookie-parser");
-const morgan = require('morgan')
+const cookieParser = require("cookie-parser"); // Parse string to cookie
+const morgan = require('morgan') // Logs the requests received
+const bcrypt = require("bcryptjs");
 ///////////////////////////////////////////////////////////
 // Configuration
 ///////////////////////////////////////////////////////////
 const app = express(); // create an express server and references it with app
 const PORT = 8080; // default port 8080
-app.set("view engine", "ejs");
+app.set("view engine", "ejs"); // The rendering engine will be EJS
 ///////////////////////////////////////////////////////////
 // Databases
 ///////////////////////////////////////////////////////////
@@ -34,17 +35,17 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: bcrypt.hashSync("purple-monkey-dinosaur",10),
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: bcrypt.hashSync("dishwasher-funk",10),
   },
   aJ48lW: {
     id: "aJ48lW",
     email: "user3@example.com",
-    password: "1234",
+    password: bcrypt.hashSync("1234",10),
   },
 };
 
@@ -54,8 +55,8 @@ const users = {
 
 // body-parser library will convert the request body from a Buffer into string that we can read
 app.use(express.urlencoded({ extended: true })); // parse incoming body
-app.use(cookieParser());
-app.use(morgan('dev'));
+app.use(cookieParser()); // Require Cookie Parser (Parse string to cookie)
+app.use(morgan('dev')); 
 
 ///////////////////////////////////////////////////////////
 // GET Routes
@@ -203,44 +204,37 @@ app.post("/login", (req, res) => {
   if (currentUser === null) {
     res.status(403).send('e-mail cannot be found.')
     return
-  } else if (users[currentUser].password !== req.body["password"]) {
-    res.status(403).send('incorrect e-mail or password')
+  } else if (!bcrypt.compareSync(req.body["password"], users[currentUser].password)) {
+    res.status(403).send('incorrect password')
     return
   }
   res.cookie("user_id", users[currentUser].id)
-  console.log("cookie:", req.cookies["user_id"]) // this returns undefined??
   res.redirect(`/urls`)
 
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id")
-  res.redirect(`/urls`)
+  res.redirect(`/login`)
 });
 
 app.post("/register", (req, res) => {
   if (req.body["email"] === '') {
-    res.status(400).send('Registration must include a valid email.')
-    console.log(users)
-    return
+    return res.status(400).send('Registration must include a valid email.')
   } else if (req.body["password"] === '') {
-    res.status(400).send('Registration must include a valid password.')
-    console.log(users)
-    return
+    return res.status(400).send('Registration must include a valid password.')
   } else if (userLookupByEmail(req.body["email"]) !== null) {
-    res.status(400).send('This email address is already registered.')
-    console.log(users)
-    return
+    return res.status(400).send('Email address is already registered.') 
   }
   newRandId = generateRandomString()
   users[newRandId] = newRandId
   users[newRandId] = {
     id: newRandId,
     email: req.body["email"],
-    password: req.body["password"],
+    password: bcrypt.hashSync(req.body["password"],10),
   }
   res.cookie("user_id", users[newRandId].id)
-  console.log(users) //log user database to console for debug
+  console.log(users) // log user database to console for debug
   res.redirect(`/urls`)
 });
 
