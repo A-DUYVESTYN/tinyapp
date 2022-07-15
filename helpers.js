@@ -35,6 +35,19 @@ const urlsForUser = function(currentUserId, database) {
   return Object.fromEntries(usersUrls.map(key => [key, database[key]]));
 };
 
+//another way from review session (developer)
+const urlsForUser2 = function(currentUserId, database) {
+  const results = {}
+
+  const keys = Object.keys(database)
+  for (const shortUrl of keys) {
+    const url = urlDatabase[shortUrl]
+    if (url.userID === currentUserId) {
+      results[shortUrl] = url
+    }
+  }
+  return results
+};
 
 module.exports = {
   getUserByEmail,
